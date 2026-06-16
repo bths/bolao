@@ -36,7 +36,6 @@
     /* CONTROLES E BOTÕES */
     .controls-main { text-align: center; margin-bottom: 2rem; }
     
-    /* Novo container para deixar os botões lado a lado */
     .botoes-container { display: flex; justify-content: center; gap: 1rem; flex-wrap: wrap; }
     
     .btn-action {
@@ -115,6 +114,18 @@
     .legend-name { color: #ccc; font-family: 'Barlow Condensed', sans-serif; font-weight: 600; }
     .legend-pts { color: #666; font-size: 0.75rem; margin-left: auto; }
 
+    /* NOVO: BOTÃO E LISTA DE PALPITES */
+    .btn-palpites { background: #1a1a1a; color: #888; border: 1px solid #333; border-radius: 20px; padding: 0.4rem 1rem; font-family: 'Barlow Condensed', sans-serif; font-size: 0.85rem; cursor: pointer; transition: all 0.2s; margin-top: 15px; text-transform: uppercase; font-weight: 600; width: 100%; }
+    .btn-palpites:hover { background: #333; color: #F5C518; }
+    .palpites-container { display: none; margin-top: 15px; border-top: 1px solid #222; padding-top: 10px; text-align: left; max-height: 180px; overflow-y: auto; }
+    .palpites-container::-webkit-scrollbar { width: 5px; }
+    .palpites-container::-webkit-scrollbar-track { background: #111; }
+    .palpites-container::-webkit-scrollbar-thumb { background: #333; border-radius: 5px; }
+    .palpite-item { display: flex; justify-content: space-between; align-items: center; font-size: 0.9rem; padding: 4px 0; color: #ccc; border-bottom: 1px dashed #222; }
+    .palpite-item:last-child { border-bottom: none; }
+    .palpite-nome { font-family: 'Barlow Condensed', sans-serif; font-weight: 500; }
+    .palpite-placar { font-weight: bold; color: #F5C518; font-family: 'Bebas Neue', sans-serif; letter-spacing: 1px; font-size: 1.1rem; }
+
     @media (max-width: 600px) {
       .podium { grid-template-columns: 1fr; }
       .podium-card.gold { transform: none; order: -1; }
@@ -188,6 +199,16 @@
       btn.disabled = false;
     }
 
+    // Função para abrir e fechar a gaveta de palpites
+    function togglePalpites(id) {
+      const container = document.getElementById(id);
+      if (container.style.display === 'block') {
+        container.style.display = 'none';
+      } else {
+        container.style.display = 'block';
+      }
+    }
+
     async function atualizarJogos() {
       const painel = document.getElementById('painel-copa');
       painel.innerHTML = ''; 
@@ -201,12 +222,22 @@
             return;
         }
 
-        const criarCard = (titulo, jogo) => {
+        const criarCard = (titulo, jogo, idContainer) => {
             if(!jogo) return '';
             
             let classeCor = 'status-agendado';
             if(jogo.statusOriginal === 'FINISHED') classeCor = 'status-encerrado';
             if(jogo.statusOriginal === 'IN_PLAY' || jogo.statusOriginal === 'PAUSED') classeCor = 'status-andamento';
+
+            // Monta o HTML com os palpites trazidos pelo Python
+            let palpitesHtml = '';
+            if (jogo.palpites && jogo.palpites.length > 0) {
+                jogo.palpites.forEach(p => {
+                    palpitesHtml += `<div class="palpite-item"><span class="palpite-nome">${p.nome}</span><span class="palpite-placar">${p.placar}</span></div>`;
+                });
+            } else {
+                palpitesHtml = '<div class="palpite-item"><span class="palpite-nome" style="color: #666;">Nenhum palpite computado.</span></div>';
+            }
 
             return `
             <div class="card-jogo">
@@ -218,13 +249,18 @@
                 <div class="time">${jogo.timeFora}</div>
               </div>
               <div class="status-rodape ${classeCor}">${jogo.statusPT}</div>
+              
+              <button class="btn-palpites" onclick="togglePalpites('${idContainer}')">Ver Palpites</button>
+              <div id="${idContainer}" class="palpites-container">
+                ${palpitesHtml}
+              </div>
             </div>`;
         };
 
         let html = '';
-        html += criarCard('Último Jogo', data.ultimoJogo);
-        html += criarCard('Ao Vivo', data.jogoAtual);
-        html += criarCard('Próximo Jogo', data.proximoJogo);
+        html += criarCard('Último Jogo', data.ultimoJogo, 'palpites-ultimo');
+        html += criarCard('Ao Vivo', data.jogoAtual, 'palpites-atual');
+        html += criarCard('Próximo Jogo', data.proximoJogo, 'palpites-proximo');
 
         if(html === '') {
             html = `<div class="card-jogo" style="color:#aaa;">Nenhum jogo rolando ou agendado no momento.</div>`;
