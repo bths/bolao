@@ -35,15 +35,19 @@
 
     /* CONTROLES E BOTÕES */
     .controls-main { text-align: center; margin-bottom: 2rem; }
+    
+    /* Novo container para deixar os botões lado a lado */
+    .botoes-container { display: flex; justify-content: center; gap: 1rem; flex-wrap: wrap; }
+    
     .btn-action {
       background: #1a1a1a; border: 1px solid #333; color: #F5C518;
       font-family: 'Barlow Condensed', sans-serif; font-size: 1rem; font-weight: 700;
       letter-spacing: 1px; padding: 0.6rem 1.5rem; border-radius: 25px; cursor: pointer;
-      transition: all .2s; text-transform: uppercase;
+      transition: all .2s; text-transform: uppercase; text-decoration: none; display: inline-flex; align-items: center;
     }
     .btn-action:hover { background: #F5C518; color: #000; border-color: #F5C518; }
     .btn-action:disabled { opacity: 0.5; cursor: default; }
-    .status { color: #888; font-size: 0.85rem; margin-top: 0.5rem; min-height: 15px; font-family: 'Barlow Condensed', sans-serif; letter-spacing: 1px;}
+    .status { color: #888; font-size: 0.85rem; margin-top: 0.8rem; min-height: 15px; font-family: 'Barlow Condensed', sans-serif; letter-spacing: 1px;}
     .erro { color: #ff6b6b; font-weight: bold; }
 
     /* PAINEL DA COPA (AO VIVO) */
@@ -126,7 +130,10 @@
   </header>
 
   <div class="controls-main">
-    <button id="btn-atualizar" class="btn-action" onclick="carregarTudo()">Atualizar Dados</button>
+    <div class="botoes-container">
+      <button id="btn-atualizar" class="btn-action" onclick="carregarTudo()">Atualizar Dados</button>
+      <a href="https://1drv.ms/x/c/8ad946cbf2f6dc55/IQCxFLQmY8LSQK17bwDqGB3iAUsrVXT0R6h_s9DyFfVWx5g?e=KQB17u" target="_blank" class="btn-action">Acessar Planilha</a>
+    </div>
     <div id="status" class="status"></div>
   </div>
 
