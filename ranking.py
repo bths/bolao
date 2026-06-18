@@ -4,8 +4,12 @@ import pandas as pd
 import json
 import os
 
-# O link de compartilhamento original (certifique-se de que é o link de "Compartilhar")
-URL_ONEDRIVE = "https://1drv.ms/x/c/8ad946cbf2f6dc55/IQCxFLQmY8LSQK17bwDqGB3iAUsrVXT0R6h_s9DyFfVWx5g?download=1"
+# O link de compartilhamento original (comentado)
+# URL_ONEDRIVE = "https://1drv.ms/x/c/8ad946cbf2f6dc55/IQCxFLQmY8LSQK17bwDqGB3iAUsrVXT0R6h_s9DyFfVWx5g?download=1"
+
+# O novo link de compartilhamento ativo
+URL_ONEDRIVE = "https://1drv.ms/x/c/8ad946cbf2f6dc55/IQBafY4NvfDWSJG58x5RBR-3AakhyvpGAeq93FOWHRknVMA?download=1"
+
 CACHE_FILE = "ranking_cache.json"
 
 def carregar_cache():

@@ -70,9 +70,22 @@ async function atualizarJogos() {
         if (jogo.palpites && jogo.palpites.length > 0) {
             jogo.palpites.forEach(p => {
                 let isCravado = false;
-                if ((jogo.statusOriginal === 'FINISHED' || jogo.statusOriginal === 'IN_PLAY' || jogo.statusOriginal === 'PAUSED') && jogo.placarCasa !== '-' && jogo.placarFora !== '-') {
-                    const placarOficial = `${jogo.placarCasa} x ${jogo.placarFora}`;
-                    if (p.placar === placarOficial) {
+                
+                // Pega o placar oficial e tira TUDO que não for número (ex: "-" vira "")
+                const casaOf = String(jogo.placarCasa).replace(/[^0-9]/g, '');
+                const foraOf = String(jogo.placarFora).replace(/[^0-9]/g, '');
+
+                // Se tiver número nos dois lados, o jogo já começou ou acabou
+                if (casaOf !== '' && foraOf !== '') {
+                    
+                    // Junta os números. Ex: Casa "1" e Fora "3" vira "13"
+                    const oficialLimpo = casaOf + foraOf;
+                    
+                    // Pega o palpite do usuário e tira tudo que não for número. Ex: "1 x 3" vira "13"
+                    const palpiteLimpo = String(p.placar).replace(/[^0-9]/g, '');
+                    
+                    // Bate os números secos
+                    if (oficialLimpo === palpiteLimpo) {
                         isCravado = true;
                     }
                 }
