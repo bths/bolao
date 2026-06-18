@@ -1,91 +1,166 @@
-* { box-sizing: border-box; margin: 0; padding: 0; }
+async function carregarTudo() {
+  const btn = document.getElementById('btn-atualizar');
+  const status = document.getElementById('status');
+  btn.disabled = true;
+  status.innerText = 'Buscando resultados e atualizando ranking...';
 
-body {
-  background: #0a0a0a; color: #e8e8e8; font-family: 'Barlow', sans-serif;
-  min-height: 100vh; padding: 2rem 1rem 4rem;
+  await Promise.all([atualizarJogos(), atualizarRanking(status)]);
+
+  status.innerText = 'Tudo atualizado com sucesso!';
+  setTimeout(() => { status.innerText = ''; }, 3000);
+  btn.disabled = false;
 }
 
-header { text-align: center; margin-bottom: 2rem; }
-h1 { font-family: 'Bebas Neue', sans-serif; font-size: 2.8rem; letter-spacing: 4px; color: #F5C518; line-height: 1; }
-.subtitle { font-family: 'Barlow Condensed', sans-serif; font-size: 1rem; color: #888; letter-spacing: 2px; text-transform: uppercase; margin-top: 0.4rem; }
-
-/* CONTROLES E BOTÕES */
-.controls-main { text-align: center; margin-bottom: 2rem; }
-.btn-action { background: #1a1a1a; border: 1px solid #333; color: #F5C518; font-family: 'Barlow Condensed', sans-serif; font-size: 1rem; font-weight: 700; letter-spacing: 1px; padding: 0.6rem 1.5rem; border-radius: 25px; cursor: pointer; transition: all .2s; text-transform: uppercase; }
-.btn-action:hover { background: #F5C518; color: #000; border-color: #F5C518; }
-.btn-action:disabled { opacity: 0.5; cursor: default; }
-.status { color: #888; font-size: 0.85rem; margin-top: 0.5rem; min-height: 15px; font-family: 'Barlow Condensed', sans-serif; letter-spacing: 1px;}
-.erro { color: #ff6b6b; font-weight: bold; }
-
-/* PAINEL DA COPA (AO VIVO) */
-.painel-copa { display: flex; gap: 1rem; margin: 0 auto 2.5rem; justify-content: center; flex-wrap: wrap; max-width: 1100px; }
-.card-jogo { background: #111; border: 1px solid #222; border-radius: 12px; padding: 1.5rem 1rem 1rem; text-align: center; flex: 1; min-width: 200px; position: relative; }
-.titulo-card { position: absolute; top: -10px; left: 50%; transform: translateX(-50%); background: #F5C518; color: #000; padding: 3px 12px; border-radius: 15px; font-family: 'Barlow Condensed', sans-serif; font-size: 0.85rem; font-weight: 700; text-transform: uppercase; }
-.horario-card { color: #888; font-size: 0.8rem; margin-bottom: 12px; display: block; border-bottom: 1px solid #222; padding-bottom: 8px; font-family: 'Barlow Condensed', sans-serif; letter-spacing: 1px; text-transform: uppercase;}
-.placar-container { display: flex; align-items: center; justify-content: space-between; color: #e8e8e8; margin-bottom: 12px;}
-.time { flex: 1; font-family: 'Barlow Condensed', sans-serif; font-size: 1.2rem; font-weight: 600; text-transform: uppercase; }
-.placar { background: #1a1a1a; padding: 5px 12px; border-radius: 6px; font-family: 'Bebas Neue', sans-serif; font-size: 1.8rem; letter-spacing: 2px; color: #F5C518; border: 1px solid #333;}
-.status-rodape { font-family: 'Barlow Condensed', sans-serif; font-size: 0.9rem; font-weight: 700; text-transform: uppercase; letter-spacing: 1px;}
-.status-agendado { color: #F5C518; }
-.status-andamento { color: #ff6b6b; animation: piscar 1.5s infinite; }
-.status-encerrado { color: #888; }
-@keyframes piscar { 0% { opacity: 1; } 50% { opacity: 0.4; } 100% { opacity: 1; } }
-
-/* PÓDIO DO BOLÃO */
-.podium { max-width: 1100px; margin: 2rem auto; display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; }
-.podium-card { background: #111; border: 1px solid #222; border-radius: 12px; padding: 1.5rem 1rem; text-align: center; }
-.podium-card.gold { border-color: #F5C518; transform: translateY(-10px); }
-.podium-card.silver { border-color: #aaa; }
-.podium-card.bronze { border-color: #cd7f32; }
-.podium-pos { font-family: 'Bebas Neue', sans-serif; font-size: 2rem; margin-bottom: 0.5rem;}
-.podium-card.gold .podium-pos { color: #F5C518; }
-.podium-card.silver .podium-pos { color: #aaa; }
-.podium-card.bronze .podium-pos { color: #cd7f32; }
-.podium-name { font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 1.2rem; text-transform: uppercase; margin: 0.2rem 0; color: #fff;}
-.podium-pts { font-family: 'Bebas Neue', sans-serif; font-size: 1.8rem; color: #F5C518; }
-.podium-premio { color: #00C48C; font-family: 'Barlow Condensed', sans-serif; font-size: 0.9rem; font-weight: 600; margin-top: 5px; text-transform: uppercase; letter-spacing: 1px;}
-
-/* TABELA GERAL */
-.tabela-wrapper { background: #111; border-radius: 12px; overflow: hidden; border: 1px solid #222; max-width: 1100px; margin: 0 auto 3rem; }
-table { width: 100%; border-collapse: collapse; }
-thead th { background: #1a1a1a; color: #F5C518; padding: 1rem; text-align: left; font-family: 'Barlow Condensed', sans-serif; font-size: 1rem; text-transform: uppercase; letter-spacing: 1px; }
-tbody tr { border-bottom: 1px solid #222; transition: background 0.15s;}
-tbody tr:hover { background: #1a1a1a; }
-td { padding: 0.8rem 1rem; color: #ccc; font-size: 0.95rem; }
-.pos { color: #888; font-family: 'Bebas Neue', sans-serif; font-size: 1.3rem; width: 50px; text-align: center;}
-.nome-tb { font-weight: 500; font-size: 1.05rem; }
-.pontos-tb { font-family: 'Bebas Neue', sans-serif; font-size: 1.4rem; color: #F5C518; text-align: right; }
-.premio-tb { color: #00C48C; text-align: right; font-family: 'Barlow Condensed', sans-serif; font-weight: 600; font-size: 0.95rem; text-transform: uppercase;}
-
-/* GRÁFICO */
-.chart-header { text-align: center; margin: 4rem 0 1.5rem; }
-.chart-wrap { background: #111; border: 1px solid #222; border-radius: 12px; padding: 2rem; max-width: 1100px; margin: 0 auto 2rem; position: relative; }
-canvas { width: 100% !important; }
-.controls { max-width: 1100px; margin: 0 auto 1.5rem; display: flex; flex-wrap: wrap; gap: 0.5rem; justify-content: center; }
-.btn-filter { background: #1a1a1a; border: 1px solid #333; color: #aaa; font-family: 'Barlow Condensed', sans-serif; font-size: 0.85rem; font-weight: 600; letter-spacing: 0.5px; padding: 0.4rem 0.9rem; border-radius: 20px; cursor: pointer; transition: all .15s; text-transform: uppercase; }
-.btn-filter:hover { border-color: #F5C518; color: #F5C518; }
-.btn-filter.active { background: #F5C518; color: #000; border-color: #F5C518; }
-.legend-grid { max-width: 1100px; margin: 1.5rem auto 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 0.5rem; }
-.legend-item { display: flex; align-items: center; gap: 0.5rem; font-size: 0.85rem; cursor: pointer; padding: 0.3rem 0.5rem; border-radius: 4px; transition: background .15s; }
-.legend-item:hover { background: #1a1a1a; }
-.legend-dot { width: 12px; height: 12px; border-radius: 50%; flex-shrink: 0; }
-.legend-name { color: #ccc; font-family: 'Barlow Condensed', sans-serif; font-weight: 600; }
-.legend-pts { color: #666; font-size: 0.75rem; margin-left: auto; }
-
-/* NOVO: BOTAO E LISTA DE PALPITES */
-.btn-palpites { background: #1a1a1a; color: #888; border: 1px solid #333; border-radius: 20px; padding: 0.4rem 1rem; font-family: 'Barlow Condensed', sans-serif; font-size: 0.85rem; cursor: pointer; transition: all 0.2s; margin-top: 15px; text-transform: uppercase; font-weight: 600; width: 100%; }
-.btn-palpites:hover { background: #333; color: #F5C518; }
-.palpites-container { display: none; margin-top: 15px; border-top: 1px solid #222; padding-top: 10px; text-align: left; max-height: 180px; overflow-y: auto; }
-.palpites-container::-webkit-scrollbar { width: 5px; }
-.palpites-container::-webkit-scrollbar-track { background: #111; }
-.palpites-container::-webkit-scrollbar-thumb { background: #333; border-radius: 5px; }
-.palpite-item { display: flex; justify-content: space-between; align-items: center; font-size: 0.9rem; padding: 4px 0; color: #ccc; border-bottom: 1px dashed #222; }
-.palpite-item:last-child { border-bottom: none; }
-.palpite-nome { font-family: 'Barlow Condensed', sans-serif; font-weight: 500; }
-.palpite-placar { font-weight: bold; color: #F5C518; font-family: 'Bebas Neue', sans-serif; letter-spacing: 1px; font-size: 1.1rem; }
-
-@media (max-width: 600px) {
-  .podium { grid-template-columns: 1fr; }
-  .podium-card.gold { transform: none; order: -1; }
-  .chart-wrap { padding: 1rem; }
+function togglePalpites(id) {
+  const container = document.getElementById(id);
+  if (container.style.display === 'block') {
+    container.style.display = 'none';
+  } else {
+    container.style.display = 'block';
+  }
 }
+
+async function atualizarJogos() {
+  const painel = document.getElementById('painel-copa');
+  painel.innerHTML = ''; 
+
+  try {
+    const response = await fetch('/jogos');
+    const data = await response.json();
+
+    if(data.error) {
+        painel.innerHTML = `<span class="erro">Erro nos jogos: ${data.error}</span>`;
+        return;
+    }
+
+    const criarCard = (titulo, jogo, idContainer) => {
+        if(!jogo) return '';
+        
+        let classeCor = 'status-agendado';
+        if(jogo.statusOriginal === 'FINISHED') classeCor = 'status-encerrado';
+        if(jogo.statusOriginal === 'IN_PLAY' || jogo.statusOriginal === 'PAUSED') classeCor = 'status-andamento';
+
+        // 1. Lógica do Termômetro (Aparece sempre, e usa o nome dos times)
+        let termometroHtml = '';
+        if (jogo.termometro) {
+            termometroHtml = `
+            <div class="termometro-wrap">
+                <div class="termometro-text">📊 ${jogo.termometro.casa}% ${jogo.timeCasa.toUpperCase()} | ${jogo.termometro.empate}% EMPATE | ${jogo.termometro.fora}% ${jogo.timeFora.toUpperCase()}</div>
+                <div class="termometro-bar">
+                    <div class="bar-casa" style="width: ${jogo.termometro.casa}%;"></div>
+                    <div class="bar-empate" style="width: ${jogo.termometro.empate}%;"></div>
+                    <div class="bar-fora" style="width: ${jogo.termometro.fora}%;"></div>
+                </div>
+            </div>`;
+        }
+
+        // 2. Lógica do Destaque da Partida (Maior Ousadia)
+        let destaqueHtml = '';
+        if (jogo.destaque) {
+            destaqueHtml = `<div style="font-size: 0.85rem; color: #aaa; margin-top: 10px; text-align: center; font-family: 'Barlow Condensed', sans-serif; letter-spacing: 0.5px;">🏆 MAIOR OUSADIA: <span style="color: #fff; font-weight: bold;">${jogo.destaque.nome}</span> (Apostou ${jogo.destaque.placar})</div>`;
+        }
+
+        // 3. Botão do WhatsApp (Para jogos em andamento ou encerrados)
+        let botaoZapHtml = '';
+        if (jogo.linkWhatsapp) {
+            botaoZapHtml = `<a href="${jogo.linkWhatsapp}" target="_blank" class="btn-zap">📲 Resumo pro Zap</a>`;
+        }
+
+        let palpitesHtml = '';
+        if (jogo.palpites && jogo.palpites.length > 0) {
+            jogo.palpites.forEach(p => {
+                let isCravado = false;
+                if ((jogo.statusOriginal === 'FINISHED' || jogo.statusOriginal === 'IN_PLAY' || jogo.statusOriginal === 'PAUSED') && jogo.placarCasa !== '-' && jogo.placarFora !== '-') {
+                    const placarOficial = `${jogo.placarCasa} x ${jogo.placarFora}`;
+                    if (p.placar === placarOficial) {
+                        isCravado = true;
+                    }
+                }
+                
+                const classeCravado = isCravado ? 'palpite-cravado' : '';
+                const iconeCravado = isCravado ? ' 🎯' : '';
+
+                palpitesHtml += `<div class="palpite-item ${classeCravado}"><span class="palpite-nome">${p.nome}</span><span class="palpite-placar">${p.placar}${iconeCravado}</span></div>`;
+            });
+        } else {
+            palpitesHtml = '<div class="palpite-item"><span class="palpite-nome" style="color: #666;">Nenhum palpite computado.</span></div>';
+        }
+
+        return `
+        <div class="card-jogo">
+          <div class="titulo-card">${titulo}</div>
+          <span class="horario-card">🕒 ${jogo.horario}</span>
+          <div class="placar-container">
+            <div class="time">${jogo.timeCasa}</div>
+            <div class="placar">${jogo.placarCasa} x ${jogo.placarFora}</div>
+            <div class="time">${jogo.timeFora}</div>
+          </div>
+          <div class="status-rodape ${classeCor}">${jogo.statusPT}</div>
+          
+          ${termometroHtml}
+          ${destaqueHtml}
+
+          <button class="btn-palpites" onclick="togglePalpites('${idContainer}')">Ver Palpites</button>
+          ${botaoZapHtml}
+          <div id="${idContainer}" class="palpites-container">
+            ${palpitesHtml}
+          </div>
+        </div>`;
+    };
+
+    let html = '';
+    html += criarCard('Último Jogo', data.ultimoJogo, 'palpites-ultimo');
+    html += criarCard('Ao Vivo', data.jogoAtual, 'palpites-atual');
+    html += criarCard('Próximo Jogo', data.proximoJogo, 'palpites-proximo');
+
+    if(html === '') {
+        html = `<div class="card-jogo" style="color:#aaa;">Nenhum jogo rolando ou agendado no momento.</div>`;
+    }
+    painel.innerHTML = html;
+  } catch (e) {
+    painel.innerHTML = `<span class="erro">Erro ao carregar placares.</span>`;
+  }
+}
+
+async function atualizarRanking(status) {
+  try {
+    const response = await fetch('/ranking');
+    const data = await response.json();
+    const tbody = document.querySelector('.tabela-ranking tbody');
+    
+    if(data.error) {
+        tbody.innerHTML = `<tr><td colspan="4" class="erro">Erro no ranking: ${data.error}</td></tr>`;
+        return;
+    }
+
+    tbody.innerHTML = '';
+    
+    const participantes = data.participantes;
+    if (!participantes || participantes.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="4" style="text-align:center; color:#aaa;">Nenhum dado encontrado no ranking.</td></tr>`;
+        return;
+    }
+
+    participantes.forEach(p => {
+      // Classes das setinhas do ranking
+      let varClass = 'var-neutral';
+      if (p.variacao_icone === '⬆️') varClass = 'var-up';
+      if (p.variacao_icone === '⬇️') varClass = 'var-down';
+
+      let numeroVariacao = p.variacao_num || '';
+
+      tbody.innerHTML += `
+        <tr>
+          <td class="pos">${p.posicao}º <span class="${varClass}" style="margin-left: 5px;">${p.variacao_icone} ${numeroVariacao}</span></td>
+          <td class="nome-tb">${p.nome}</td>
+          <td class="pontos-tb">${p.pontos}</td>
+          <td class="premio-tb">${p.premio || '-'}</td>
+        </tr>`;
+    });
+  } catch (e) {
+    const tbody = document.querySelector('.tabela-ranking tbody');
+    tbody.innerHTML = `<tr><td colspan="4" class="erro">Erro ao carregar o ranking.</td></tr>`;
+  }
+}
+
+window.onload = carregarTudo;

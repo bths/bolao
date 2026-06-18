@@ -11,10 +11,11 @@ h1 { font-family: 'Bebas Neue', sans-serif; font-size: 2.8rem; letter-spacing: 4
 
 /* CONTROLES E BOTÕES */
 .controls-main { text-align: center; margin-bottom: 2rem; }
-.btn-action { background: #1a1a1a; border: 1px solid #333; color: #F5C518; font-family: 'Barlow Condensed', sans-serif; font-size: 1rem; font-weight: 700; letter-spacing: 1px; padding: 0.6rem 1.5rem; border-radius: 25px; cursor: pointer; transition: all .2s; text-transform: uppercase; }
+.botoes-container { display: flex; justify-content: center; gap: 1rem; flex-wrap: wrap; }
+.btn-action { background: #1a1a1a; border: 1px solid #333; color: #F5C518; font-family: 'Barlow Condensed', sans-serif; font-size: 1rem; font-weight: 700; letter-spacing: 1px; padding: 0.6rem 1.5rem; border-radius: 25px; cursor: pointer; transition: all .2s; text-transform: uppercase; text-decoration: none; display: inline-flex; align-items: center; }
 .btn-action:hover { background: #F5C518; color: #000; border-color: #F5C518; }
 .btn-action:disabled { opacity: 0.5; cursor: default; }
-.status { color: #888; font-size: 0.85rem; margin-top: 0.5rem; min-height: 15px; font-family: 'Barlow Condensed', sans-serif; letter-spacing: 1px;}
+.status { color: #888; font-size: 0.85rem; margin-top: 0.8rem; min-height: 15px; font-family: 'Barlow Condensed', sans-serif; letter-spacing: 1px;}
 .erro { color: #ff6b6b; font-weight: bold; }
 
 /* PAINEL DA COPA (AO VIVO) */
@@ -31,6 +32,31 @@ h1 { font-family: 'Bebas Neue', sans-serif; font-size: 2.8rem; letter-spacing: 4
 .status-encerrado { color: #888; }
 @keyframes piscar { 0% { opacity: 1; } 50% { opacity: 0.4; } 100% { opacity: 1; } }
 
+/* NOVO: TERMÔMETRO */
+.termometro-wrap { margin-top: 15px; font-family: 'Barlow Condensed', sans-serif; border-top: 1px solid #222; padding-top: 12px; }
+.termometro-text { font-size: 0.85rem; color: #aaa; margin-bottom: 6px; text-transform: uppercase; letter-spacing: 1px; }
+.termometro-bar { display: flex; height: 6px; border-radius: 3px; overflow: hidden; background: #222; }
+.bar-casa { background: #00C48C; transition: width 0.5s ease; }
+.bar-empate { background: #888; transition: width 0.5s ease; }
+.bar-fora { background: #FF6B6B; transition: width 0.5s ease; }
+
+/* BOTAO E LISTA DE PALPITES */
+.btn-palpites { background: #1a1a1a; color: #888; border: 1px solid #333; border-radius: 20px; padding: 0.4rem 1rem; font-family: 'Barlow Condensed', sans-serif; font-size: 0.85rem; cursor: pointer; transition: all 0.2s; margin-top: 15px; text-transform: uppercase; font-weight: 600; width: 100%; }
+.btn-palpites:hover { background: #333; color: #F5C518; }
+.palpites-container { display: none; margin-top: 15px; border-top: 1px solid #222; padding-top: 10px; text-align: left; max-height: 180px; overflow-y: auto; }
+.palpites-container::-webkit-scrollbar { width: 5px; }
+.palpites-container::-webkit-scrollbar-track { background: #111; }
+.palpites-container::-webkit-scrollbar-thumb { background: #333; border-radius: 5px; }
+.palpite-item { display: flex; justify-content: space-between; align-items: center; font-size: 0.9rem; padding: 4px 0; color: #ccc; border-bottom: 1px dashed #222; }
+.palpite-item:last-child { border-bottom: none; }
+.palpite-nome { font-family: 'Barlow Condensed', sans-serif; font-weight: 500; }
+.palpite-placar { font-weight: bold; color: #F5C518; font-family: 'Bebas Neue', sans-serif; letter-spacing: 1px; font-size: 1.1rem; }
+
+/* NOVO: DESTAQUE PARA CRAVAÇÃO */
+.palpite-cravado { background: #1a1a1a; border: 1px solid #F5C518; border-radius: 6px; padding: 4px 8px; margin: 2px 0; border-bottom: 1px solid #F5C518; }
+.palpite-cravado .palpite-nome { color: #F5C518; font-weight: 700; }
+.palpite-cravado .palpite-placar { color: #fff; }
+
 /* PÓDIO DO BOLÃO */
 .podium { max-width: 1100px; margin: 2rem auto; display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; }
 .podium-card { background: #111; border: 1px solid #222; border-radius: 12px; padding: 1.5rem 1rem; text-align: center; }
@@ -44,6 +70,12 @@ h1 { font-family: 'Bebas Neue', sans-serif; font-size: 2.8rem; letter-spacing: 4
 .podium-name { font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 1.2rem; text-transform: uppercase; margin: 0.2rem 0; color: #fff;}
 .podium-pts { font-family: 'Bebas Neue', sans-serif; font-size: 1.8rem; color: #F5C518; }
 .podium-premio { color: #00C48C; font-family: 'Barlow Condensed', sans-serif; font-size: 0.9rem; font-weight: 600; margin-top: 5px; text-transform: uppercase; letter-spacing: 1px;}
+
+/* NOVO: TROFÉUS E ESTATÍSTICAS */
+.estatisticas-box { max-width: 1100px; margin: 0 auto 2.5rem; background: #111; border: 1px solid #222; border-radius: 12px; padding: 1.5rem; text-align: center; display: none; }
+.estatisticas-titulo { font-family: 'Bebas Neue', sans-serif; font-size: 1.8rem; color: #F5C518; letter-spacing: 2px; margin-bottom: 1rem; }
+.estat-item { color: #ccc; font-size: 1rem; margin-bottom: 0.5rem; font-family: 'Barlow Condensed', sans-serif; letter-spacing: 1px; }
+.estat-destaque { color: #fff; font-weight: bold; font-size: 1.1rem; }
 
 /* TABELA GERAL */
 .tabela-wrapper { background: #111; border-radius: 12px; overflow: hidden; border: 1px solid #222; max-width: 1100px; margin: 0 auto 3rem; }
@@ -72,20 +104,17 @@ canvas { width: 100% !important; }
 .legend-name { color: #ccc; font-family: 'Barlow Condensed', sans-serif; font-weight: 600; }
 .legend-pts { color: #666; font-size: 0.75rem; margin-left: auto; }
 
-/* NOVO: BOTAO E LISTA DE PALPITES */
-.btn-palpites { background: #1a1a1a; color: #888; border: 1px solid #333; border-radius: 20px; padding: 0.4rem 1rem; font-family: 'Barlow Condensed', sans-serif; font-size: 0.85rem; cursor: pointer; transition: all 0.2s; margin-top: 15px; text-transform: uppercase; font-weight: 600; width: 100%; }
-.btn-palpites:hover { background: #333; color: #F5C518; }
-.palpites-container { display: none; margin-top: 15px; border-top: 1px solid #222; padding-top: 10px; text-align: left; max-height: 180px; overflow-y: auto; }
-.palpites-container::-webkit-scrollbar { width: 5px; }
-.palpites-container::-webkit-scrollbar-track { background: #111; }
-.palpites-container::-webkit-scrollbar-thumb { background: #333; border-radius: 5px; }
-.palpite-item { display: flex; justify-content: space-between; align-items: center; font-size: 0.9rem; padding: 4px 0; color: #ccc; border-bottom: 1px dashed #222; }
-.palpite-item:last-child { border-bottom: none; }
-.palpite-nome { font-family: 'Barlow Condensed', sans-serif; font-weight: 500; }
-.palpite-placar { font-weight: bold; color: #F5C518; font-family: 'Bebas Neue', sans-serif; letter-spacing: 1px; font-size: 1.1rem; }
-
 @media (max-width: 600px) {
   .podium { grid-template-columns: 1fr; }
   .podium-card.gold { transform: none; order: -1; }
   .chart-wrap { padding: 1rem; }
 }
+
+/* SETINHAS DO RANKING */
+.var-up { color: #00C48C; font-weight: bold; font-size: 0.9rem; }
+.var-down { color: #FF6B6B; font-weight: bold; font-size: 0.9rem; }
+.var-neutral { color: #555; font-size: 0.9rem; }
+
+/* BOTÃO WHATSAPP */
+.btn-zap { background: #25D366; color: #fff; border: none; border-radius: 20px; padding: 0.4rem 1rem; font-family: 'Barlow Condensed', sans-serif; font-size: 0.85rem; cursor: pointer; transition: all 0.2s; margin-top: 10px; text-transform: uppercase; font-weight: 600; width: 100%; text-decoration: none; display: inline-block; text-align: center; }
+.btn-zap:hover { background: #128C7E; }
