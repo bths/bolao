@@ -2,10 +2,11 @@ import io
 import requests
 import pandas as pd
 import json
-from banco import db # <-- Importa a conexão centralizada e persistente do banco
+from banco import db
+from historico import processar_historico_grafico # <-- Puxando a nossa nova inteligência do gráfico
 
-# O novo link de compartilhamento ativo
-URL_ONEDRIVE = "https://1drv.ms/x/c/8ad946cbf2f6dc55/IQBafY4NvfDWSJG58x5RBR-3AakhyvpGAeq93FOWHRknVMA?download=1"
+# O novo link de compartilhamento ativo atualizado!
+URL_ONEDRIVE = "https://1drv.ms/x/c/8ad946cbf2f6dc55/IQAdm9N8Bx_mQKjtj5t-ijfGAQeXAj05aTkDqyzDlFkZd3k?e=Pyt8Es"
 
 def obter_ranking_publico():
     """Apenas lê o ranking mastigado do banco de dados (0 ms de processamento)."""
@@ -58,6 +59,7 @@ def processar_e_sincronizar_ranking():
     df = pd.read_excel(xls, sheet_name=nome_aba, engine='openpyxl')
     participantes_atual = []
     
+    # --- 1. PROCESSA O RANKING ---
     for _, row in df.iterrows():
         try:
             pos_val = row.iloc[0]
@@ -88,10 +90,58 @@ def processar_e_sincronizar_ranking():
         except:
             continue
 
+    # --- 2. PROCESSA O HISTÓRICO DO GRÁFICO ---
+    try:
+        # Lê a aba Resultados. Se der erro de coluna não encontrada, verifique se o header=2 está certo
+        df_res = pd.read_excel(xls, sheet_name='Resultados', engine='openpyxl', header=2)
+        
+        jogos_encerrados_planilha = []
+        contador_jogo = 1
+        
+        for _, row in df_res.iterrows():
+            # Tenta pegar as colunas de acordo com o padrão que você usa
+            time_a = str(row.get('Time A', '')).strip()
+            gols_a = row.get('Chute A')
+            gols_b = row.get('Chute B')
+            
+            # Se os placares estiverem preenchidos, o jogo acabou!
+            if time_a and time_a.lower() != 'nan' and pd.notna(gols_a) and pd.notna(gols_b):
+                try:
+                    g_a = int(float(gols_a))
+                    g_b = int(float(gols_b))
+                    # Monta o título exato: "J20 · Brasil 2x0"
+                    label = f"J{contador_jogo} · {time_a} {g_a}x{g_b}"
+                    jogos_encerrados_planilha.append(label)
+                    contador_jogo += 1
+                except ValueError:
+                    pass # Se tiver um "X" ou texto no placar, ignora
+
+        # Puxa os dados antigos do banco para comparar
+        dados_labels_str = db.get("grafico_labels")
+        dados_pts_str = db.get("grafico_dados")
+        
+        db_labels_antigos = json.loads(dados_labels_str) if dados_labels_str else []
+        db_dados_antigos = json.loads(dados_pts_str) if dados_pts_str else []
+
+        # Passa pelo nosso cérebro do historico.py
+        novos_labels, novos_dados = processar_historico_grafico(
+            jogos_encerrados_planilha, 
+            participantes_atual, 
+            db_labels_antigos, 
+            db_dados_antigos
+        )
+
+        # Salva o gráfico atualizado na nuvem!
+        if db:
+            db.set("grafico_labels", json.dumps(novos_labels))
+            db.set("grafico_dados", json.dumps(novos_dados))
+            
+    except Exception as e:
+        print(f"⚠️ Aviso: Não foi possível sincronizar o gráfico. Erro: {e}")
+
+    # --- 3. SALVA O RANKING NO BANCO ---
     if db:
-        # 1. Salva a memória para as setinhas da próxima rodada
         db.set("memoria_posicoes", json.dumps({p['nome']: p['posicao'] for p in participantes_atual}))
-        # 2. Salva o ranking completo mastigado para a rota pública
         db.set("ranking_completo", json.dumps(participantes_atual))
         
     return participantes_atual

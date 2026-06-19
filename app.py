@@ -3,12 +3,16 @@ import requests
 import pandas as pd
 from datetime import datetime, timedelta, timezone
 import urllib.parse
+import json
 
 # Importando os nossos módulos especialistas!
 from ranking import obter_planilha, obter_ranking_publico, processar_e_sincronizar_ranking
 from estatisticas import analisar_palpites_jogo
 from dicionarios import paises_traduzidos, status_traduzido
 from regras_bolao import gerar_previa_whatsapp
+
+# Importação nova: para ler os dados do gráfico direto do banco
+from banco import ler_do_banco 
 
 app = Flask(__name__)
 
@@ -30,6 +34,19 @@ def ranking_route():
         return jsonify({"participantes": participantes})
     except Exception as e:
         return jsonify({"error": str(e)}), 500
+
+# --- NOVA ROTA: A PONTE DO GRÁFICO ---
+@app.route("/api/grafico")
+def api_grafico():
+    try:
+        # Lê os arrays que o "Trator" (sincronização) salvou no Upstash
+        labels = ler_do_banco("grafico_labels") or []
+        dados = ler_do_banco("grafico_dados") or []
+        
+        return jsonify({"labels": labels, "dados": dados})
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+# --------------------------------------
 
 @app.route("/admin/sincronizar")
 def sincronizar_route():
@@ -159,3 +176,20 @@ def jogos():
 
 if __name__ == "__main__":
     app.run(debug=True, use_reloader=False)
+    
+# --- NOVA ROTA: A PONTE DO GRÁFICO ---
+@app.route("/api/grafico")
+def api_grafico():
+    try:
+        # Lê os dados brutos (Strings) do banco
+        labels_raw = ler_do_banco("grafico_labels")
+        dados_raw = ler_do_banco("grafico_dados")
+        
+        # Converte de String de volta para Listas/Dicionários do Python
+        labels = json.loads(labels_raw) if isinstance(labels_raw, str) else (labels_raw or [])
+        dados = json.loads(dados_raw) if isinstance(dados_raw, str) else (dados_raw or [])
+        
+        return jsonify({"labels": labels, "dados": dados})
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+# --------------------------------------
