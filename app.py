@@ -35,13 +35,17 @@ def ranking_route():
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
-# --- NOVA ROTA: A PONTE DO GRÁFICO ---
+# --- NOVA ROTA: A PONTE DO GRÁFICO (Corrigida e no lugar certo) ---
 @app.route("/api/grafico")
 def api_grafico():
     try:
-        # Lê os arrays que o "Trator" (sincronização) salvou no Upstash
-        labels = ler_do_banco("grafico_labels") or []
-        dados = ler_do_banco("grafico_dados") or []
+        # Lê os dados brutos (Strings) do banco
+        labels_raw = ler_do_banco("grafico_labels")
+        dados_raw = ler_do_banco("grafico_dados")
+        
+        # Converte de String de volta para Listas/Dicionários do Python
+        labels = json.loads(labels_raw) if isinstance(labels_raw, str) else (labels_raw or [])
+        dados = json.loads(dados_raw) if isinstance(dados_raw, str) else (dados_raw or [])
         
         return jsonify({"labels": labels, "dados": dados})
     except Exception as e:
@@ -176,20 +180,3 @@ def jogos():
 
 if __name__ == "__main__":
     app.run(debug=True, use_reloader=False)
-    
-# --- NOVA ROTA: A PONTE DO GRÁFICO ---
-@app.route("/api/grafico")
-def api_grafico():
-    try:
-        # Lê os dados brutos (Strings) do banco
-        labels_raw = ler_do_banco("grafico_labels")
-        dados_raw = ler_do_banco("grafico_dados")
-        
-        # Converte de String de volta para Listas/Dicionários do Python
-        labels = json.loads(labels_raw) if isinstance(labels_raw, str) else (labels_raw or [])
-        dados = json.loads(dados_raw) if isinstance(dados_raw, str) else (dados_raw or [])
-        
-        return jsonify({"labels": labels, "dados": dados})
-    except Exception as e:
-        return jsonify({"error": str(e)}), 500
-# --------------------------------------
