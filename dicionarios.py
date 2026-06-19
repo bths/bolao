@@ -1,32 +1,37 @@
 # dicionarios.py
 
 paises_traduzidos = {
-    'Brazil': '🇧🇷 Brasil', 'France': '🇫🇷 França', 'Germany': '🇩🇪 Alemanha', 
-    'Spain': '🇪🇸 Espanha', 'Netherlands': '🇳🇱 Holanda', 'Italy': '🇮🇹 Itália',
-    'Croatia': '🇭🇷 Croácia', 'Belgium': '🇧🇪 Bélgica', 'Switzerland': '🇨🇭 Suíça', 
-    'USA': '🇺🇸 Estados Unidos', 'Mexico': '🇲🇽 México', 'Japan': '🇯🇵 Japão', 
-    'South Korea': '🇰🇷 Coreia do Sul', 'New Zealand': '🇳🇿 Nova Zelândia', 
-    'Norway': '🇳🇴 Noruega', 'Sweden': '🇸🇪 Suécia', 'Tunisia': '🇹🇳 Tunísia',
-    'Cape Verde Islands': '🇨🇻 Cabo Verde', 'Egypt': '🇪🇬 Egito', 
-    'Saudi Arabia': '🇸🇦 Arábia Saudita', 'Ivory Coast': '🇨🇮 Costa do Marfim',
-    'Czech Republic': '🇨🇿 República Tcheca', 'Czechia': '🇨🇿 República Tcheca', 
-    'Iraq': '🇮🇶 Iraque', 'Senegal': '🇸🇳 Senegal', 'Argentina': '🇦🇷 Argentina', 
-    'Uruguay': '🇺🇾 Uruguai', 'Portugal': '🇵🇹 Portugal', 'England': '🏴󠁧󠁢󠁥󠁮󠁧󠁿 Inglaterra', 
-    'Iran': '🇮🇷 Irã', 'Algeria': '🇩🇿 Argélia', 'Austria': '🇦🇹 Áustria', 
-    'Jordan': '🇯🇴 Jordânia', 'Ghana': '🇬🇭 Gana', 'Panama': '🇵🇦 Panamá', 
-    'Colombia': '🇨🇴 Colômbia', 'South Africa': '🇿🇦 África do Sul', 
-    'Bosnia and Herzegovina': '🇧🇦 Bósnia e Herzegovina', 'Canada': '🇨🇦 Canadá', 
-    'Qatar': '🇶🇦 Catar', 'Morocco': '🇲🇦 Marrocos', 'Scotland': '🏴󠁧󠁢󠁳󠁣󠁴󠁿 Escócia',
-    'Uzbekistan': '🇺🇿 Uzbequistão', 'DR Congo': '🇨🇩 Rep. Dem. do Congo', 
-    'Congo DR': '🇨🇩 Rep. Dem. do Congo',
+    'brazil': '🇧🇷 Brasil', 'france': '🇫🇷 França', 'germany': '🇩🇪 Alemanha', 
+    'spain': '🇪🇸 Espanha', 'netherlands': '🇳🇱 Holanda', 'italy': '🇮🇹 Itália',
+    'croatia': '🇭🇷 Croácia', 'belgium': '🇧🇪 Bélgica', 'switzerland': '🇨🇭 Suíça', 
+    'mexico': '🇲🇽 México', 'japan': '🇯🇵 Japão', 'south korea': '🇰🇷 Coreia do Sul', 
+    'new zealand': '🇳🇿 Nova Zelândia', 'norway': '🇳🇴 Noruega', 'sweden': '🇸🇪 Suécia', 
+    'tunisia': '🇹🇳 Tunísia', 'cape verde islands': '🇨🇻 Cabo Verde', 'egypt': '🇪🇬 Egito', 
+    'saudi arabia': '🇸🇦 Arábia Saudita', 'ivory coast': '🇨🇮 Costa do Marfim',
+    'czech republic': '🇨🇿 República Tcheca', 'czechia': '🇨🇿 República Tcheca', 
+    'iraq': '🇮🇶 Iraque', 'senegal': '🇸🇳 Senegal', 'argentina': '🇦🇷 Argentina', 
+    'uruguay': '🇺🇾 Uruguai', 'portugal': '🇵🇹 Portugal', 'england': '🏴󠁧󠁢󠁥󠁮󠁧󠁿 Inglaterra', 
+    'iran': '🇮🇷 Irã', 'algeria': '🇩🇿 Argélia', 'austria': '🇦🇹 Áustria', 
+    'jordan': '🇯🇴 Jordânia', 'ghana': '🇬🇭 Gana', 'panama': '🇵🇦 Panamá', 
+    'colombia': '🇨🇴 Colômbia', 'south africa': '🇿🇦 África do Sul', 
+    'bosnia and herzegovina': '🇧🇦 Bósnia e Herzegovina', 'canada': '🇨🇦 Canadá', 
+    'qatar': '🇶🇦 Catar', 'morocco': '🇲🇦 Marrocos', 'scotland': '🏴󠁧󠁢󠁳󠁣󠁴󠁿 Escócia',
+    'uzbekistan': '🇺🇿 Uzbequistão', 'dr congo': '🇨🇩 Rep. Dem. do Congo', 
+    'congo dr': '🇨🇩 Rep. Dem. do Congo', 'haiti': '🇭🇹 Haiti', 'ecuador': '🇪🇨 Equador',
+    'curaçao': '🇨🇼 Curaçao', 'curacao': '🇨🇼 Curaçao', 'turkey': '🇹🇷 Turquia', 
+    'türkiye': '🇹🇷 Turquia', 'paraguay': '🇵🇾 Paraguai', 'australia': '🇦🇺 Austrália',
+    'united states': '🇺🇸 Estados Unidos', 'usa': '🇺🇸 Estados Unidos',
     
-    # Adicionados a partir da nova aba da planilha:
-    'Haiti': '🇭🇹 Haiti',
-    'Ecuador': '🇪🇨 Equador',
-    'Curaçao': '🇨🇼 Curaçao', 'Curacao': '🇨🇼 Curaçao',
-    'Turkey': '🇹🇷 Turquia', 'Türkiye': '🇹🇷 Turquia',
-    'Paraguay': '🇵🇾 Paraguai',
-    'Australia': '🇦🇺 Austrália'
+    # 🚨 Adições Extras - Seleções Comuns/Tradicionais Faltantes 🚨
+    'denmark': '🇩🇰 Dinamarca', 'serbia': '🇷🇸 Sérvia', 'poland': '🇵🇱 Polônia',
+    'ukraine': '🇺🇦 Ucrânia', 'wales': '🏴󠁧󠁢󠁷󠁬󠁳󠁿 País de Gales', 'hungary': '🇭🇺 Hungria',
+    'costa rica': '🇨🇷 Costa Rica', 'jamaica': '🇯🇲 Jamaica', 'honduras': '🇭🇳 Honduras',
+    'el salvador': '🇸🇻 El Salvador', 'chile': '🇨🇱 Chile', 'peru': '🇵🇪 Peru',
+    'venezuela': '🇻🇪 Venezuela', 'bolivia': '🇧🇴 Bolívia', 'nigeria': '🇳🇬 Nigéria',
+    'cameroon': '🇨🇲 Camarões', 'mali': '🇲🇱 Mali', 'uae': '🇦🇪 Emirados Árabes',
+    'united arab emirates': '🇦🇪 Emirados Árabes', 'china': '🇨🇳 China',
+    'israel': '🇮🇱 Israel', 'ireland': '🇮🇪 Irlanda', 'romania': '🇷🇴 Romênia',
+    'slovakia': '🇸🇰 Eslováquia', 'slovenia': '🇸🇮 Eslovênia', 'greece': '🇬🇷 Grécia'
 }
 
 status_traduzido = {

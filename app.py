@@ -5,7 +5,7 @@ from datetime import datetime, timedelta, timezone
 import urllib.parse
 
 # Importando os nossos módulos especialistas!
-from ranking import obter_planilha, processar_ranking
+from ranking import obter_planilha, obter_ranking_publico, processar_e_sincronizar_ranking
 from estatisticas import analisar_palpites_jogo
 from dicionarios import paises_traduzidos, status_traduzido
 from regras_bolao import gerar_previa_whatsapp
@@ -18,11 +18,29 @@ API_FUTEBOL_KEY = "9a10f987ae224619b823b476f326b376"
 def index():
     return render_template("index.html")
 
+@app.route("/admin")
+def admin():
+    return render_template("admin.html")
+
 @app.route("/ranking")
 def ranking_route():
     try:
-        participantes = processar_ranking()
+        # ROTA PÚBLICA: Agora consome os dados mastigados do Redis na nuvem
+        participantes = obter_ranking_publico()
         return jsonify({"participantes": participantes})
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+@app.route("/admin/sincronizar")
+def sincronizar_route():
+    try:
+        # ROTA ADMINISTRATIVA: Baixa o Excel, calcula e atualiza a nuvem do Upstash
+        participantes = processar_e_sincronizar_ranking()
+        return jsonify({
+            "status": "sucesso",
+            "mensagem": "Planilha processada e banco de dados atualizado com sucesso!",
+            "total_participantes": len(participantes)
+        })
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
@@ -31,7 +49,7 @@ def jogos():
     try:
         fuso_br = timezone(timedelta(hours=-3))
         agora = datetime.now(fuso_br)
-        # Ampliando a busca: de ontem até 3 dias no futuro para garantir que pegue o jogo finalizado
+        # Ampliando a busca: de ontem até 3 dias no futuro
         ontem = (agora - timedelta(days=1)).strftime('%Y-%m-%d')
         futuro = (agora + timedelta(days=3)).strftime('%Y-%m-%d')
 
@@ -72,12 +90,15 @@ def jogos():
                 linha_normal = df_participante[(df_ta == ta_limpo) & (df_tb == tb_limpo)]
                 linha_invertida = df_participante[(df_ta == tb_limpo) & (df_tb == ta_limpo)]
                 ca, cb = None, None
+                
+                # Voltou para a forma original e correta
                 if not linha_normal.empty:
                     ca = linha_normal.iloc[0].get('Chute A')
                     cb = linha_normal.iloc[0].get('Chute B')
                 elif not linha_invertida.empty:
                     ca = linha_invertida.iloc[0].get('Chute B')
                     cb = linha_invertida.iloc[0].get('Chute A')
+                
                 if pd.notna(ca) and pd.notna(cb):
                     try:
                         gols_a, gols_b = int(float(ca)), int(float(cb))
@@ -91,36 +112,30 @@ def jogos():
             data_jogo = dt_local.strftime('%d/%m')
 
             status = p['status']
-            casa = paises_traduzidos.get(p.get('homeTeam', {}).get('name', 'A definir'), p.get('homeTeam', {}).get('name', 'A definir'))
-            fora = paises_traduzidos.get(p.get('awayTeam', {}).get('name', 'A definir'), p.get('awayTeam', {}).get('name', 'A definir'))
-            placar_casa = p.get('score', {}).get('fullTime', {}).get('home', '-')
-            placar_fora = p.get('score', {}).get('fullTime', {}).get('away', '-')
+            
+            nome_casa_api = p.get('homeTeam', {}).get('name', 'A definir')
+            nome_fora_api = p.get('awayTeam', {}).get('name', 'A definir')
+            
+            casa = paises_traduzidos.get(nome_casa_api.lower().strip(), nome_casa_api)
+            fora = paises_traduzidos.get(nome_fora_api.lower().strip(), nome_fora_api)
 
             palpites_processados = buscar_palpites_jogo(casa, fora)
             analise = analisar_palpites_jogo(palpites_processados)
             
-            #CORRETO
-
-            
-            # Extração segura e direta sem blocos try/except
             score = p.get('score', {})
             full_time = score.get('fullTime', {}) if isinstance(score, dict) else {}
             
             placar_casa = full_time.get('home') if isinstance(full_time, dict) else None
             placar_fora = full_time.get('away') if isinstance(full_time, dict) else None
             
-            # Garante que, se for None, será exibido como '-'
             if placar_casa is None: placar_casa = '-'
             if placar_fora is None: placar_fora = '-'
-            
-            #CORRETO
 
-            # Link do WhatsApp
             link_whatsapp = ""
             if status in ['IN_PLAY', 'PAUSED', 'FINISHED']:
                 texto_previa = gerar_previa_whatsapp(casa, fora, placar_casa, placar_fora, palpites_processados)
                 if texto_previa:
-                    aviso = "\n\n⚠️ AVISO: Bolão sem fins lucrativos. A API gratuita pode ter atraso em relação ao jogo real. Se o placar não atualizou, aguarde um instante."
+                    aviso = "\n\n⚠️ AVISO: O portal pode ter atraso em relação ao jogo real. Se o placar não atualizou, aguarde um instante."
                     mensagem = f"{texto_previa}\n\n🕒 Consulta: {datetime.now(fuso_br).strftime('%d/%m às %H:%M')}{aviso}"
                     link_whatsapp = f"https://api.whatsapp.com/send?text={urllib.parse.quote(mensagem)}"
 

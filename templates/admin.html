@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Painel Admin - Bolão 2026</title>
+    <style>
+        body {
+            background-color: #121212;
+            color: #ffffff;
+            font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+        }
+        .container {
+            background-color: #1e1e1e;
+            padding: 40px;
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+            text-align: center;
+            max-width: 400px;
+        }
+        h1 { color: #f5c518; margin-bottom: 10px; }
+        p { color: #aaaaaa; margin-bottom: 30px; line-height: 1.5; }
+        .btn-sync {
+            background-color: #f5c518;
+            color: #121212;
+            border: none;
+            padding: 15px 30px;
+            font-size: 18px;
+            font-weight: bold;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            width: 100%;
+        }
+        .btn-sync:hover { background-color: #d4a715; }
+        .btn-sync:disabled {
+            background-color: #555555;
+            color: #888888;
+            cursor: not-allowed;
+        }
+        #status-msg {
+            margin-top: 20px;
+            font-size: 14px;
+            min-height: 20px;
+        }
+        .sucesso { color: #4caf50; }
+        .erro { color: #f44336; }
+        .carregando { color: #f5c518; }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h1>⚙️ Painel Admin</h1>
+        <p>Aperte o botão abaixo para baixar a planilha do OneDrive, calcular o ranking e atualizar o banco de dados.</p>
+        
+        <button id="btn-sincronizar" class="btn-sync" onclick="iniciarSincronizacao()">
+            Sincronizar Planilha
+        </button>
+
+        <div id="status-msg"></div>
+    </div>
+
+    <script>
+        async function iniciarSincronizacao() {
+            const btn = document.getElementById('btn-sincronizar');
+            const msg = document.getElementById('status-msg');
+
+            // Muda o estado do botão
+            btn.disabled = true;
+            btn.innerText = "Sincronizando... Aguarde";
+            msg.className = "carregando";
+            msg.innerText = "⏳ Baixando Excel e processando dados...";
+
+            try {
+                // Chama a nossa rota da API que faz o trabalho sujo
+                const resposta = await fetch('/admin/sincronizar');
+                const dados = await resposta.json();
+
+                if (resposta.ok) {
+                    msg.className = "sucesso";
+                    msg.innerText = "✅ " + dados.mensagem;
+                } else {
+                    throw new Error(dados.error || "Erro desconhecido");
+                }
+            } catch (erro) {
+                msg.className = "erro";
+                msg.innerText = "❌ Falha: " + erro.message;
+            } finally {
+                // Volta o botão ao normal
+                btn.disabled = false;
+                btn.innerText = "Sincronizar Planilha";
+            }
+        }
+    </script>
+
+</body>
+</html>

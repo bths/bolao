@@ -2,28 +2,32 @@ import io
 import requests
 import pandas as pd
 import json
-import os
-
-# O link de compartilhamento original (comentado)
-# URL_ONEDRIVE = "https://1drv.ms/x/c/8ad946cbf2f6dc55/IQCxFLQmY8LSQK17bwDqGB3iAUsrVXT0R6h_s9DyFfVWx5g?download=1"
+from banco import db # <-- Importa a conexão centralizada e persistente do banco
 
 # O novo link de compartilhamento ativo
 URL_ONEDRIVE = "https://1drv.ms/x/c/8ad946cbf2f6dc55/IQBafY4NvfDWSJG58x5RBR-3AakhyvpGAeq93FOWHRknVMA?download=1"
 
-CACHE_FILE = "ranking_cache.json"
-
-def carregar_cache():
-    if os.path.exists(CACHE_FILE):
+def obter_ranking_publico():
+    """Apenas lê o ranking mastigado do banco de dados (0 ms de processamento)."""
+    if db:
         try:
-            with open(CACHE_FILE, 'r') as f:
-                return json.load(f)
-        except:
-            return {}
-    return {}
+            dados = db.get("ranking_completo")
+            if dados:
+                return json.loads(dados) if isinstance(dados, str) else dados
+        except Exception as e:
+            print(f"Erro ao ler ranking_completo: {e}")
+    return []
 
-def salvar_cache(data):
-    with open(CACHE_FILE, 'w') as f:
-        json.dump(data, f)
+def carregar_memoria_posicoes():
+    """Busca a memória de posições da rodada anterior para calcular as setinhas."""
+    if db:
+        try:
+            dados = db.get("memoria_posicoes")
+            if dados:
+                return json.loads(dados) if isinstance(dados, str) else dados
+        except Exception as e:
+            print(f"Erro ao carregar memória: {e}")
+    return {}
 
 def obter_planilha():
     """Faz o download simulando um navegador real para evitar erro 403."""
@@ -32,26 +36,22 @@ def obter_planilha():
         "Referer": "https://onedrive.live.com/"
     }
     
-    # Força a URL a pedir o download direto
     url_base = URL_ONEDRIVE.split("?")[0]
     url_direta = f"{url_base}?download=1"
     
     session = requests.Session()
     resposta = session.get(url_direta, headers=headers, timeout=20)
     resposta.raise_for_status()
-    
     return io.BytesIO(resposta.content)
 
-def processar_ranking():
-    memoria_anterior = carregar_cache()
+def processar_e_sincronizar_ranking():
+    """Faz o trabalho pesado: baixa Excel, roda Pandas e salva no banco."""
+    memoria_anterior = carregar_memoria_posicoes()
+    
     arquivo_xls = obter_planilha()
     xls = pd.ExcelFile(arquivo_xls, engine='openpyxl')
     
-    # Busca a aba ignorando maiúsculas/minúsculas e espaços
-    #nome_aba = next((s for s in xls.sheet_names if s.strip().lower() == "ranking"), None)
-    # Procura a aba procurando por "ranking" em qualquer parte do nome
     nome_aba = next((s for s in xls.sheet_names if "ranking" in s.lower()), None)
-    
     if not nome_aba:
         raise ValueError(f"Aba 'Ranking' não encontrada. Abas disponíveis: {xls.sheet_names}")
         
@@ -73,7 +73,6 @@ def processar_ranking():
                 "premio": str(row.iloc[3]).strip() if len(row) > 3 and pd.notna(row.iloc[3]) else ""
             }
             
-            # Lógica das setinhas (usando o cache persistente)
             pos_antiga = memoria_anterior.get(p['nome'], p['posicao'])
             
             if not memoria_anterior:
@@ -89,6 +88,10 @@ def processar_ranking():
         except:
             continue
 
-    # Atualiza o cache no disco
-    salvar_cache({p['nome']: p['posicao'] for p in participantes_atual})
+    if db:
+        # 1. Salva a memória para as setinhas da próxima rodada
+        db.set("memoria_posicoes", json.dumps({p['nome']: p['posicao'] for p in participantes_atual}))
+        # 2. Salva o ranking completo mastigado para a rota pública
+        db.set("ranking_completo", json.dumps(participantes_atual))
+        
     return participantes_atual
