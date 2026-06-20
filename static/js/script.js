@@ -68,32 +68,18 @@ async function atualizarJogos() {
             destaqueHtml = `<div style="font-size: 0.85rem; color: #aaa; margin-top: 10px; text-align: center; font-family: 'Barlow Condensed', sans-serif; letter-spacing: 0.5px;">🏆 MAIOR OUSADIA: <span style="color: #fff; font-weight: bold;">${jogo.destaque.nome}</span> (Apostou ${jogo.destaque.placar})</div>`;
         }
 
-        // 3. Botão do WhatsApp
-        /*
-        let botaoZapHtml = '';
-        if (jogo.linkWhatsapp) {
-            botaoZapHtml = `<a href="${jogo.linkWhatsapp}" target="_blank" class="btn-zap">📲 Resumo pro Zap</a>`;
-        }
-         */
         let palpitesHtml = '';
         if (jogo.palpites && jogo.palpites.length > 0) {
             jogo.palpites.forEach(p => {
                 let isCravado = false;
                 
-                // Pega o placar oficial e tira TUDO que não for número (ex: "-" vira "")
                 const casaOf = String(jogo.placarCasa).replace(/[^0-9]/g, '');
                 const foraOf = String(jogo.placarFora).replace(/[^0-9]/g, '');
 
-                // Se tiver número nos dois lados, o jogo já começou ou acabou
                 if (casaOf !== '' && foraOf !== '') {
-                    
-                    // Junta os números. Ex: Casa "1" e Fora "3" vira "13"
                     const oficialLimpo = casaOf + foraOf;
-                    
-                    // Pega o palpite do usuário e tira tudo que não for número. Ex: "1 x 3" vira "13"
                     const palpiteLimpo = String(p.placar).replace(/[^0-9]/g, '');
                     
-                    // Bate os números secos
                     if (oficialLimpo === palpiteLimpo) {
                         isCravado = true;
                     }
@@ -123,7 +109,6 @@ async function atualizarJogos() {
           ${destaqueHtml}
 
           <button class="btn-palpites" onclick="togglePalpites('${idContainer}')">Ver Palpites</button>
-          <!-- botaoZapHtml desativado temporariamente -->
           <div id="${idContainer}" class="palpites-container">
             ${palpitesHtml}
           </div>
@@ -173,10 +158,35 @@ async function atualizarRanking(status) {
 
       let numeroVariacao = p.variacao_num || '';
 
+      // A MÁGICA DA CAÇA AO LÍDER (Agora com pódio e lógica de empate!)
+      let difHtml = '';
+      let dif = p.diferenca_para_proximo;
+
+      if (p.posicao === 1) {
+          difHtml = `<div class="diferenca-pts lider">👑 Defendendo a liderança</div>`;
+      } else if (dif !== undefined && dif !== null) {
+          // Lógica para saber se está empatado ou atrás
+          let texto = dif === 0 ? `Empatado com o ${p.posicao - 1}º` : `Faltam ${dif} pts pro ${p.posicao - 1}º`;
+          
+          // Adiciona as medalhas para o 2º e 3º
+          if (p.posicao === 2) {
+              texto = dif === 0 ? `Empatado com o Líder` : `Faltam ${dif} pts pro Líder`;
+              difHtml = `<div class="diferenca-pts prata">🥈 ${texto}</div>`;
+          } else if (p.posicao === 3) {
+              difHtml = `<div class="diferenca-pts bronze">🥉 ${texto}</div>`;
+          } else {
+              // Do 4º em diante, fica com um alvo e uma cor mais discreta
+              difHtml = `<div class="diferenca-pts"> ${texto}</div>`;
+          }
+      }
+
       tbody.innerHTML += `
         <tr>
           <td class="pos">${p.posicao}º <span class="${varClass}" style="margin-left: 5px;">${p.variacao_icone} ${numeroVariacao}</span></td>
-          <td class="nome-tb">${p.nome}</td>
+          <td class="nome-tb">
+            ${p.nome}
+            ${difHtml}
+          </td>
           <td class="pontos-tb">${p.pontos}</td>
           <td class="premio-tb">${p.premio || '-'}</td>
         </tr>`;
@@ -185,27 +195,6 @@ async function atualizarRanking(status) {
     const tbody = document.querySelector('.tabela-ranking tbody');
     if (tbody) tbody.innerHTML = `<tr><td colspan="4" class="erro">Erro ao carregar o ranking.</td></tr>`;
   }
-}
-
-// === NOVA LÓGICA DO GRÁFICO DINÂMICO ===
-async function carregarGrafico() {
-    try {
-        const response = await fetch('/api/grafico');
-        const json = await response.json();
-
-        if (json.error) throw new Error(json.error);
-
-        jogosLabels = json.labels || [];
-        dadosGrafico = json.dados || [];
-
-        // Só desenha se houver dados
-        if (jogosLabels.length > 0 && dadosGrafico.length > 0) {
-            buildChart('all');
-            gerarLegenda();
-        }
-    } catch (e) {
-        console.error("Erro ao carregar o gráfico:", e);
-    }
 }
 
 function getDatasets(filter) {
@@ -300,7 +289,7 @@ function gerarLegenda() {
     });
 }
 
-// === NOVA LÓGICA DO GRÁFICO DINÂMICO ===
+// === LÓGICA DO GRÁFICO DINÂMICO ===
 async function carregarGrafico() {
     try {
         const response = await fetch('/api/grafico');
@@ -308,7 +297,7 @@ async function carregarGrafico() {
 
         if (json.error) throw new Error(json.error);
 
-        // A MÁGICA ESTÁ AQUI: Transforma o texto em Array (se vier como texto)
+        // Transforma o texto em Array (se vier como texto)
         jogosLabels = typeof json.labels === 'string' ? JSON.parse(json.labels) : (json.labels || []);
         dadosGrafico = typeof json.dados === 'string' ? JSON.parse(json.dados) : (json.dados || []);
 

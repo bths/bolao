@@ -118,3 +118,36 @@ canvas { width: 100% !important; }
 /* BOTÃO WHATSAPP */
 .btn-zap { background: #25D366; color: #fff; border: none; border-radius: 20px; padding: 0.4rem 1rem; font-family: 'Barlow Condensed', sans-serif; font-size: 0.85rem; cursor: pointer; transition: all 0.2s; margin-top: 10px; text-transform: uppercase; font-weight: 600; width: 100%; text-decoration: none; display: inline-block; text-align: center; }
 .btn-zap:hover { background: #128C7E; }
+
+/* CAÇA AO LÍDER (Diferença de pontos) */
+.diferenca-pts { 
+  font-size: 0.75rem; 
+  color: #888; 
+  margin-top: 3px; 
+  font-family: 'Barlow Condensed', sans-serif; 
+  letter-spacing: 0.5px; 
+  text-transform: uppercase; 
+}
+.diferenca-pts.lider { 
+  color: #F5C518; 
+}
+
+/* CAÇA AO LÍDER (Diferença de pontos e Pódio) */
+.diferenca-pts { 
+  font-size: 0.75rem; 
+  color: #777; /* Cor discreta para o 4º em diante */
+  margin-top: 3px; 
+  font-family: 'Barlow Condensed', sans-serif; 
+  letter-spacing: 0.5px; 
+  text-transform: uppercase; 
+}
+.diferenca-pts.lider { 
+  color: #F5C518; /* Ouro */
+  font-weight: 600;
+}
+.diferenca-pts.prata { 
+  color: #e0e0e0; /* Prata brilhante */
+}
+.diferenca-pts.bronze { 
+  color: #d4a373; /* Bronze */
+}

@@ -112,52 +112,38 @@ def jogos():
         resp.raise_for_status()
         partidas = resp.json().get('matches', [])
 
-        arquivo_xls = obter_planilha()
-        xls = pd.ExcelFile(arquivo_xls, engine="openpyxl")
-        abas_ignoradas = ['Ranking', 'Resultados', 'Palpites Especiais', 'Gabarito']
-        abas_participantes = [aba for aba in xls.sheet_names if aba not in abas_ignoradas]
-
-        dfs_participantes = {}
-        for aba in abas_participantes:
-            try:
-                df = pd.read_excel(xls, sheet_name=aba, engine="openpyxl", header=2)
-                df['Time A'] = df.get('Time A', '').astype(str).str.strip()
-                df['Time B'] = df.get('Time B', '').astype(str).str.strip()
-                dfs_participantes[aba] = df
-            except:
-                continue
+        # ==========================================
+        # NOVA LÓGICA DE LEITURA (SAI PANDAS, ENTRA REDIS)
+        # ==========================================
+        palpites_raw = ler_do_banco("todos_os_palpites")
+        todos_palpites_db = json.loads(palpites_raw) if isinstance(palpites_raw, str) else (palpites_raw or {})
 
         ultimo_jogo, jogo_atual, proximo_jogo = None, None, None
         partidas.sort(key=lambda x: x['utcDate'])
 
         def buscar_palpites_jogo(time_a, time_b):
-            palpites = []
+            # Limpa os nomes para bater com a chave gerada no ranking.py
             ta_limpo = str(time_a).split(' ', 1)[-1].strip().lower() if ' ' in str(time_a) else str(time_a).strip().lower()
             tb_limpo = str(time_b).split(' ', 1)[-1].strip().lower() if ' ' in str(time_b) else str(time_b).strip().lower()
 
-            for nome_participante, df_participante in dfs_participantes.items():
-                if 'Time A' not in df_participante.columns or 'Time B' not in df_participante.columns:
-                    continue
-                df_ta = df_participante['Time A'].str.lower()
-                df_tb = df_participante['Time B'].str.lower()
-                linha_normal = df_participante[(df_ta == ta_limpo) & (df_tb == tb_limpo)]
-                linha_invertida = df_participante[(df_ta == tb_limpo) & (df_tb == ta_limpo)]
-                ca, cb = None, None
-                
-                # Voltou para a forma original e correta
-                if not linha_normal.empty:
-                    ca = linha_normal.iloc[0].get('Chute A')
-                    cb = linha_normal.iloc[0].get('Chute B')
-                elif not linha_invertida.empty:
-                    ca = linha_invertida.iloc[0].get('Chute B')
-                    cb = linha_invertida.iloc[0].get('Chute A')
-                
-                if pd.notna(ca) and pd.notna(cb):
+            chave_normal = f"{ta_limpo}_x_{tb_limpo}"
+            chave_invertida = f"{tb_limpo}_x_{ta_limpo}"
+
+            if chave_normal in todos_palpites_db:
+                return todos_palpites_db[chave_normal]
+            elif chave_invertida in todos_palpites_db:
+                # Se achou invertido, precisamos desinverter o placar para a exibição no front-end
+                palpites_invertidos = []
+                for p in todos_palpites_db[chave_invertida]:
                     try:
-                        gols_a, gols_b = int(float(ca)), int(float(cb))
-                        palpites.append({"nome": nome_participante, "placar": f"{gols_a} x {gols_b}"})
-                    except: pass 
-            return palpites
+                        g_b, g_a = map(int, p['placar'].split(' x '))
+                        palpites_invertidos.append({"nome": p['nome'], "placar": f"{g_a} x {g_b}"})
+                    except:
+                        pass
+                return palpites_invertidos
+            
+            return []
+        # ==========================================
 
         for p in partidas:
             dt_utc = datetime.strptime(p['utcDate'], "%Y-%m-%dT%H:%M:%SZ").replace(tzinfo=timezone.utc)
