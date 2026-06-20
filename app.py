@@ -75,11 +75,14 @@ def painel():
 
 @app.route("/api/log", methods=["POST", "OPTIONS"])
 def log_acesso():
-    data = request.get_json(force=True) 
+    data = request.get_json(force=True)
     
-    # O Render/Proxy envia o IP real do usuário aqui:
-    if request.headers.getlist("X-Forwarded-For"):
-        ip = request.headers.getlist("X-Forwarded-For")[0]
+    # Captura o cabeçalho completo
+    x_forwarded_for = request.headers.get("X-Forwarded-For")
+    
+    if x_forwarded_for:
+        # Pega apenas o primeiro IP da lista e remove espaços extras
+        ip = x_forwarded_for.split(',')[0].strip()
     else:
         ip = request.remote_addr
         
