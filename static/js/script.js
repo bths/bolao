@@ -69,11 +69,12 @@ async function atualizarJogos() {
         }
 
         // 3. Botão do WhatsApp
+        /*
         let botaoZapHtml = '';
         if (jogo.linkWhatsapp) {
             botaoZapHtml = `<a href="${jogo.linkWhatsapp}" target="_blank" class="btn-zap">📲 Resumo pro Zap</a>`;
         }
-
+         */
         let palpitesHtml = '';
         if (jogo.palpites && jogo.palpites.length > 0) {
             jogo.palpites.forEach(p => {
@@ -122,7 +123,7 @@ async function atualizarJogos() {
           ${destaqueHtml}
 
           <button class="btn-palpites" onclick="togglePalpites('${idContainer}')">Ver Palpites</button>
-          ${botaoZapHtml}
+          <!-- botaoZapHtml desativado temporariamente -->
           <div id="${idContainer}" class="palpites-container">
             ${palpitesHtml}
           </div>
