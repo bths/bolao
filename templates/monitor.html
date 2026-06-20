@@ -1,0 +1,16 @@
+<!-- templates/monitor.html -->
+<script>
+    // Monitoramento Global: Dispara ao carregar qualquer página
+    fetch('/api/log', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ evento: 'abertura' })
+    });
+
+    // Monitoramento de saída (fechamento)
+    window.addEventListener('visibilitychange', () => {
+        if (document.visibilityState === 'hidden') {
+            navigator.sendBeacon('/api/log', JSON.stringify({ evento: 'fechamento' }));
+        }
+    });
+</script>

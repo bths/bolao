@@ -75,9 +75,14 @@ def painel():
 
 @app.route("/api/log", methods=["POST", "OPTIONS"])
 def log_acesso():
-    # Isso resolve o 415 garantindo que pegamos o JSON mesmo se o header oscilar
     data = request.get_json(force=True) 
-    ip = request.remote_addr
+    
+    # O Render/Proxy envia o IP real do usuário aqui:
+    if request.headers.getlist("X-Forwarded-For"):
+        ip = request.headers.getlist("X-Forwarded-For")[0]
+    else:
+        ip = request.remote_addr
+        
     registrar_acesso(ip, data.get("evento"))
     return jsonify({"status": "sucesso"})
 
