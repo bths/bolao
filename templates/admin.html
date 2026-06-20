@@ -23,6 +23,7 @@
             box-shadow: 0 4px 15px rgba(0,0,0,0.5);
             text-align: center;
             max-width: 400px;
+            width: 90%;
         }
         h1 { color: #f5c518; margin-bottom: 10px; }
         p { color: #aaaaaa; margin-bottom: 30px; line-height: 1.5; }
@@ -39,16 +40,18 @@
             width: 100%;
         }
         .btn-sync:hover { background-color: #d4a715; }
-        .btn-sync:disabled {
-            background-color: #555555;
-            color: #888888;
-            cursor: not-allowed;
-        }
-        #status-msg {
-            margin-top: 20px;
+        .btn-sync:disabled { background-color: #555555; color: #888888; cursor: not-allowed; }
+        
+        .link-painel {
+            display: block;
+            margin-top: 25px;
+            color: #45B7D1;
+            text-decoration: none;
             font-size: 14px;
-            min-height: 20px;
         }
+        .link-painel:hover { text-decoration: underline; }
+
+        #status-msg { margin-top: 20px; font-size: 14px; min-height: 20px; }
         .sucesso { color: #4caf50; }
         .erro { color: #f44336; }
         .carregando { color: #f5c518; }
@@ -58,28 +61,48 @@
 
     <div class="container">
         <h1>⚙️ Painel Admin</h1>
-        <p>Aperte o botão abaixo para baixar a planilha do OneDrive, calcular o ranking e atualizar o banco de dados.</p>
+        <p>Aperte o botão abaixo para sincronizar os dados da planilha.</p>
         
         <button id="btn-sincronizar" class="btn-sync" onclick="iniciarSincronizacao()">
             Sincronizar Planilha
         </button>
 
+        <a href="/painel" class="link-painel">📊 Acessar Painel de Monitoramento</a>
+
         <div id="status-msg"></div>
     </div>
 
     <script>
+        // Trava de segurança: só carrega a página se a senha estiver correta
+        window.onload = function() {
+            const senha = prompt("Digite a senha de administrador:");
+            if (senha !== "FOGO13") {
+                alert("Acesso Negado!");
+                window.location.href = "/";
+            } else {
+                // Registra que o admin entrou no painel
+                registrarAcessoAdmin();
+            }
+        };
+
+        async function registrarAcessoAdmin() {
+            fetch('/api/log', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ evento: 'abertura' })
+            });
+        }
+
         async function iniciarSincronizacao() {
             const btn = document.getElementById('btn-sincronizar');
             const msg = document.getElementById('status-msg');
 
-            // Muda o estado do botão
             btn.disabled = true;
-            btn.innerText = "Sincronizando... Aguarde";
+            btn.innerText = "Sincronizando...";
             msg.className = "carregando";
-            msg.innerText = "⏳ Baixando Excel e processando dados...";
+            msg.innerText = "⏳ Processando...";
 
             try {
-                // Chama a nossa rota da API que faz o trabalho sujo
                 const resposta = await fetch('/admin/sincronizar');
                 const dados = await resposta.json();
 
@@ -93,12 +116,10 @@
                 msg.className = "erro";
                 msg.innerText = "❌ Falha: " + erro.message;
             } finally {
-                // Volta o botão ao normal
                 btn.disabled = false;
                 btn.innerText = "Sincronizar Planilha";
             }
         }
     </script>
-
 </body>
 </html>

@@ -1,15 +1,18 @@
-from flask import Flask, jsonify, render_template
 import requests
 import pandas as pd
-from datetime import datetime, timedelta, timezone
 import urllib.parse
 import json
+
+from flask import Flask, jsonify, render_template, request
+from datetime import datetime, timedelta, timezone
+
 
 # Importando os nossos módulos especialistas!
 from ranking import obter_planilha, obter_ranking_publico, processar_e_sincronizar_ranking
 from estatisticas import analisar_palpites_jogo
 from dicionarios import paises_traduzidos, status_traduzido
 from regras_bolao import gerar_previa_whatsapp
+from monitor import registrar_acesso
 
 # Importação nova: para ler os dados do gráfico direto do banco
 from banco import ler_do_banco 
@@ -64,6 +67,27 @@ def sincronizar_route():
         })
     except Exception as e:
         return jsonify({"error": str(e)}), 500
+
+# ROTA DO PAINEL DE MONITORAMENTO
+@app.route("/painel")
+def painel():
+    return render_template("painel.html")
+
+@app.route("/api/log", methods=["POST", "OPTIONS"])
+def log_acesso():
+    # Isso resolve o 415 garantindo que pegamos o JSON mesmo se o header oscilar
+    data = request.get_json(force=True) 
+    ip = request.remote_addr
+    registrar_acesso(ip, data.get("evento"))
+    return jsonify({"status": "sucesso"})
+
+@app.route("/api/logs_lista")
+def logs_lista():
+    # Busca os logs salvos no Redis
+    from banco import db
+    logs = [json.loads(l) for l in db.lrange("acessos_logs", 0, -1)]
+    return jsonify(logs)
+
 
 @app.route("/jogos")
 def jogos():

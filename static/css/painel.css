@@ -1,0 +1,17 @@
+body {
+    background-color: #121212;
+    color: #f1f1f1;
+    font-family: 'Barlow', sans-serif;
+    padding: 20px;
+}
+.tabela-logs {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+}
+.tabela-logs th, .tabela-logs td {
+    padding: 12px;
+    border-bottom: 1px solid #333;
+    text-align: left;
+}
+.tabela-logs th { color: #F5C518; }
