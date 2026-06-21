@@ -1,4 +1,5 @@
 import io
+import time
 import requests
 import pandas as pd
 import json
@@ -20,14 +21,15 @@ def obter_ranking_publico():
     return []
 
 def obter_planilha():
-    """Faz o download simulando um navegador real para evitar erro 403."""
+    """Faz o download simulando um navegador real e quebrando o cache do OneDrive."""
     headers = {
         "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36",
         "Referer": "https://onedrive.live.com/"
     }
     
     url_base = URL_ONEDRIVE.split("?")[0]
-    url_direta = f"{url_base}?download=1"
+    # O &t= timestamp garante que o OneDrive entregue a versão mais recente e não uma velha em cache
+    url_direta = f"{url_base}?download=1&t={int(time.time())}"
     
     session = requests.Session()
     resposta = session.get(url_direta, headers=headers, timeout=20)
@@ -124,28 +126,25 @@ def processar_e_sincronizar_ranking():
         db.set("grafico_labels", json.dumps(novos_labels))
         db.set("grafico_dados", json.dumps(novos_dados))
 
-    # --- 4. O NOVO MOTOR MATEMÁTICO DE RANKING (Blindado contra falhas) ---
+    # --- 4. O NOVO MOTOR MATEMÁTICO DE RANKING (Corrigido e Blindado) ---
     def obter_pto_antigo(j):
         pts = j.get('pts')
         if not pts: pts = [] # Proteção contra dados corrompidos
         return pts[-2] if len(pts) >= 2 else (pts[0] if len(pts) == 1 else 0)
 
-    def obter_pto_novo(j):
-        pts = j.get('pts')
-        if not pts: pts = []
-        return pts[-1] if len(pts) >= 1 else 0
-
+    # Ranking de ontem olha para o gráfico
     ranking_ontem = sorted(novos_dados, key=lambda x: (-obter_pto_antigo(x), x['nome']))
     posicoes_ontem = {jogador['nome']: idx + 1 for idx, jogador in enumerate(ranking_ontem)}
 
-    ranking_hoje = sorted(novos_dados, key=lambda x: (-obter_pto_novo(x), x['nome']))
+    # Ranking de hoje olha DIRETAMENTE para a planilha (pontos frescos do Passo 1)
+    ranking_hoje = sorted(pontos_da_planilha, key=lambda x: (-x['pontos'], x['nome']))
     
     participantes_atual = []
     pontos_do_cara_de_cima = None
 
     for i, jogador in enumerate(ranking_hoje):
         nome = jogador['nome']
-        pontos_agora = obter_pto_novo(jogador)
+        pontos_agora = jogador['pontos']
         
         posicao_agora = i + 1
         posicao_antes = posicoes_ontem.get(nome, posicao_agora)

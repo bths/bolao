@@ -151,3 +151,61 @@ canvas { width: 100% !important; }
 .diferenca-pts.bronze { 
   color: #d4a373; /* Bronze */
 }
+
+/* Cores do Pódio e Rebaixamento */
+.cor-ouro {
+    color: #F5C518 !important; /* Dourado combinando com o seu tema */
+    text-shadow: 0 0 8px rgba(245, 197, 24, 0.3);
+}
+
+.cor-prata {
+    color: #E0E0E0 !important;
+}
+
+.cor-bronze {
+    color: #CD7F32 !important;
+}
+
+.cor-rebaixamento {
+    color: #FF4C4C !important; /* Vermelho alerta */
+}
+/* Efeito de Ultrapassagem */
+@keyframes pulsoVerde {
+    0% { background-color: transparent; }
+    50% { background-color: rgba(37, 211, 102, 0.15); box-shadow: inset 4px 0px 10px rgba(37, 211, 102, 0.2); }
+    100% { background-color: transparent; }
+}
+
+.linha-subiu {
+    animation: pulsoVerde 2.5s ease-in-out infinite;
+    border-left: 3px solid #25D366; /* Uma barrinha verde sutil na lateral esquerda */
+}
+
+/* Fundo para o Pódio e Rebaixamento - Cores Fortes */
+.tabela-ranking tbody tr.bg-ouro td {
+    background-color: rgba(245, 197, 24, 0.25) !important; /* Opacidade aumentada para 25% */
+}
+.tabela-ranking tbody tr.bg-ouro td:first-child {
+    border-left: 4px solid #F5C518 !important;
+}
+
+.tabela-ranking tbody tr.bg-prata td {
+    background-color: rgba(224, 224, 224, 0.18) !important; /* Opacidade aumentada para 18% */
+}
+.tabela-ranking tbody tr.bg-prata td:first-child {
+    border-left: 4px solid #E0E0E0 !important;
+}
+
+.tabela-ranking tbody tr.bg-bronze td {
+    background-color: rgba(205, 127, 50, 0.25) !important; /* Opacidade aumentada para 25% */
+}
+.tabela-ranking tbody tr.bg-bronze td:first-child {
+    border-left: 4px solid #CD7F32 !important;
+}
+
+.tabela-ranking tbody tr.bg-rebaixamento td {
+    background-color: rgba(255, 76, 76, 0.15) !important; /* Leve aumento para manter a harmonia */
+}
+.tabela-ranking tbody tr.bg-rebaixamento td:first-child {
+    border-left: 4px solid #FF4C4C !important;
+}

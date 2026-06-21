@@ -150,6 +150,9 @@ async function atualizarRanking(status) {
         return;
     }
 
+    // Pega o total de participantes para calcular o rebaixamento (últimos 4)
+    const totalParticipantes = participantes.length;
+
     participantes.forEach(p => {
       // Classes das setinhas do ranking
       let varClass = 'var-neutral';
@@ -158,32 +161,47 @@ async function atualizarRanking(status) {
 
       let numeroVariacao = p.variacao_num || '';
 
-      // A MÁGICA DA CAÇA AO LÍDER (Agora com pódio e lógica de empate!)
+      // A MÁGICA DA CAÇA AO LÍDER 
       let difHtml = '';
       let dif = p.diferenca_para_proximo;
 
       if (p.posicao === 1) {
           difHtml = `<div class="diferenca-pts lider">👑 Defendendo a liderança</div>`;
       } else if (dif !== undefined && dif !== null) {
-          // Lógica para saber se está empatado ou atrás
           let texto = dif === 0 ? `Empatado com o ${p.posicao - 1}º` : `Faltam ${dif} pts pro ${p.posicao - 1}º`;
           
-          // Adiciona as medalhas para o 2º e 3º
           if (p.posicao === 2) {
               texto = dif === 0 ? `Empatado com o Líder` : `Faltam ${dif} pts pro Líder`;
               difHtml = `<div class="diferenca-pts prata">🥈 ${texto}</div>`;
           } else if (p.posicao === 3) {
               difHtml = `<div class="diferenca-pts bronze">🥉 ${texto}</div>`;
           } else {
-              // Do 4º em diante, fica com um alvo e uma cor mais discreta
               difHtml = `<div class="diferenca-pts"> ${texto}</div>`;
           }
       }
 
+      // LÓGICA DE CORES DO PÓDIO E REBAIXAMENTO (Texto do Nome)
+      let classeCorNome = '';
+      let classeFundoTr = ''; // Variável para o fundo da linha
+      
+      if (p.posicao === 1) {
+          classeCorNome = 'cor-ouro';
+          classeFundoTr = 'bg-ouro';
+      } else if (p.posicao === 2) {
+          classeCorNome = 'cor-prata';
+          classeFundoTr = 'bg-prata';
+      } else if (p.posicao === 3) {
+          classeCorNome = 'cor-bronze';
+          classeFundoTr = 'bg-bronze';
+      } else if (p.posicao > totalParticipantes - 4) { // Os 4 últimos
+          classeCorNome = 'cor-rebaixamento';
+          classeFundoTr = 'bg-rebaixamento';
+      }
+
       tbody.innerHTML += `
-        <tr>
+        <tr class="${classeFundoTr}">
           <td class="pos">${p.posicao}º <span class="${varClass}" style="margin-left: 5px;">${p.variacao_icone} ${numeroVariacao}</span></td>
-          <td class="nome-tb">
+          <td class="nome-tb ${classeCorNome}">
             ${p.nome}
             ${difHtml}
           </td>
@@ -312,3 +330,8 @@ async function carregarGrafico() {
 }
 
 window.onload = carregarTudo;
+
+// Atualiza os dados em segundo plano silenciosamente a cada 60 segundos
+setInterval(() => {
+    carregarTudo();
+}, 60000);
