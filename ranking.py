@@ -7,7 +7,7 @@ from banco import db
 from historico import processar_historico_grafico
 
 # O novo link de compartilhamento ativo atualizado!
-URL_ONEDRIVE = "https://1drv.ms/x/c/8ad946cbf2f6dc55/IQAdm9N8Bx_mQKjtj5t-ijfGAQeXAj05aTkDqyzDlFkZd3k?e=Pyt8Es"
+URL_ONEDRIVE = "https://cc1l9i.s.gy/I5QGld"
 
 def obter_ranking_publico():
     """Apenas lê o ranking mastigado do banco de dados (0 ms de processamento)."""
