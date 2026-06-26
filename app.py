@@ -1,3 +1,4 @@
+import io
 import requests
 import pandas as pd
 import urllib.parse
@@ -152,8 +153,12 @@ def jogos():
 
             status = p['status']
             
-            nome_casa_api = p.get('homeTeam', {}).get('name', 'A definir')
-            nome_fora_api = p.get('awayTeam', {}).get('name', 'A definir')
+            # Extração totalmente segura contra objetos ou nomes de times nulos da API
+            home_team = p.get('homeTeam')
+            away_team = p.get('awayTeam')
+            
+            nome_casa_api = home_team.get('name') if isinstance(home_team, dict) and home_team.get('name') else 'A definir'
+            nome_fora_api = away_team.get('name') if isinstance(away_team, dict) and away_team.get('name') else 'A definir'
             
             casa = paises_traduzidos.get(nome_casa_api.lower().strip(), nome_casa_api)
             fora = paises_traduzidos.get(nome_fora_api.lower().strip(), nome_fora_api)
